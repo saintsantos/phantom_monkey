@@ -145,8 +145,8 @@ void sitUp() {
   }
 */
 
-  digitalWrite(sitUpMotor, OFF);                //stops sitUpMotor
-  timeCounter = 0;                              //reset timeCounter
+  digitalWrite(sitUpMotor, OFF);                //sitUpSwitch has gone low, break out of loop and turn off sitUpMotor
+  //timeCounter = 0;                              //reset timeCounter (deprecated)
   digitalWrite(led, HIGH);              //turns on LED to proper voltage
   for (neckServoPos = neckServoDown; neckServoPos < neckServoUp; neckServoPos++){
     neckServo.write(neckServoPos);              //tilt head up
@@ -176,14 +176,14 @@ void layDown() {
       digitalWrite(clapMotor, OFF);                 //stop clapping
       for (neckServoPos = neckServoUp; neckServoPos > neckServoDown-1; neckServoPos--){
           neckServo.write(neckServoPos);              //lower head
-          delay(neckTime/abs(neckServoUp-neckServoDown));            //wait for neck to complete
+          delay(neckTime/abs(neckServoUp-neckServoDown));            //wait for neck to complete (value never changes, is 27.78ms every time
       }
       delay(250);
       analogWrite(led, LOW);                        //turn off LED
       digitalWrite(layDownMotor, ON);             //activate layDownMotor
       while(digitalRead(layDownSwitch) == HIGH /* && timeCounter < layDownTime*/) {   //wait for layDownSwitch (with timer backup)
         delay(10);         //checks layDownSwitch every 10 milliseconds                   
-        timeCounter+=10;    //increment timeCounter by 10 milliseconds
+       // timeCounter+=10;    //increment timeCounter by 10 milliseconds (deprecated)
       }
 /*
       if (timeCounter == layDownTime) {             //if layDownSwitch didn't trigger, stop motor and exit layDown
@@ -192,7 +192,7 @@ void layDown() {
       }
 */
       digitalWrite(layDownMotor, OFF);              //stop layDownMotor
-      timeCounter = 0;                              //reset timeCounter
+     // timeCounter = 0;                              //reset timeCounter (deprecated)
       for (lidServoPos = lidServoOpen; lidServoPos < lidServoClose; lidServoPos++){
         lidServo.write(lidServoPos);                 //close lid
         delay(lidTime/abs(lidServoOpen-lidServoClose));               //wait for lid to close, divides time evenly across positional change
