@@ -86,8 +86,12 @@ void loop() {
  // if (/*digitalRead(closeRelay)==HIGH && digitalRead(lidSwitch) == LOW && */ digitalRead(openRelay) == LOW) sitUp();
  // if (digitalRead(closeRelay)==LOW /* && digitalRead(lidSwitch) == HIGH && digitalRead(openRelay) == HIGH */) layDown();
 
-  if(digitalRead(openRelay) == LOW) sitUp();
-  if(digitalRead(closeRelay) == HIGH) layDown();
+  if(digitalRead(openRelay) == LOW) {
+    sitUp();
+  }
+  if(digitalRead(closeRelay) == HIGH) {
+    layDown();
+  }
   
 /*Cutting Out Extras  
   if (digitalRead(A1) == LOW) {
@@ -109,6 +113,8 @@ void loop() {
   }//END IF resetPressed
 */
 
+  delay(1000);    //Added delay for good practice
+
 }//END LOOP
 
 /*
@@ -129,7 +135,7 @@ void sitUp() {
   digitalWrite(sitUpMotor, ON);                //activate sitUpMotor
   while(digitalRead(sitUpSwitch) == HIGH /* && timeCounter < layDownTime */) {   //wait for sitUpSwitch (with timer backup)
     delay(10);         //checks sitUpSwitch every 10 milliseconds
-    timeCounter+=10;     //increment timeCounter by 10 milliseconds
+    //timeCounter+=10;     //increment timeCounter by 10 milliseconds //Time counter is not necessary here
   }
 
 /*
