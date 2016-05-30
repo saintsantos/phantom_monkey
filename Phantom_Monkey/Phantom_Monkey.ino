@@ -113,7 +113,7 @@ void loop() {
   }//END IF resetPressed
 */
 
-  delay(1000);    //Added delay for good practice
+  delay(50);    //Added delay for good practice
 
 }//END LOOP
 
@@ -169,14 +169,14 @@ void sitUp() {
  * return to loop() and shut down layDownMotor if timer expires on laying down motion
  */
 void layDown() {
-  bool b = true;
+  //bool b = true;
   digitalWrite(A0, ON);      //connects servo power
-  while(b){
+  while(1){
     if (digitalRead(armsOpen) == LOW) {            //only runs when arms are ready to close
       digitalWrite(clapMotor, OFF);                 //stop clapping
       for (neckServoPos = neckServoUp; neckServoPos > neckServoDown-1; neckServoPos--){
           neckServo.write(neckServoPos);              //lower head
-          delay(neckTime/abs(neckServoUp-neckServoDown));            //wait for neck to complete (value never changes, is 27.78ms every time
+          delay(neckTime/abs(neckServoUp-neckServoDown));            //wait for neck to complete (value never changes, is 27.78ms every time)
       }
       delay(250);
       analogWrite(led, LOW);                        //turn off LED
@@ -195,9 +195,10 @@ void layDown() {
      // timeCounter = 0;                              //reset timeCounter (deprecated)
       for (lidServoPos = lidServoOpen; lidServoPos < lidServoClose; lidServoPos++){
         lidServo.write(lidServoPos);                 //close lid
-        delay(lidTime/abs(lidServoOpen-lidServoClose));               //wait for lid to close, divides time evenly across positional change
+        delay(lidTime/abs(lidServoOpen-lidServoClose));               //wait for lid to close, divides time evenly across positional change (Value never changes)
       }
-      b = false;
+      //b = false;
+      break;
     }//END IF (armsOpen == LOW)
   }//END WHILE (b)
   delay(100);
