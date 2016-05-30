@@ -126,7 +126,12 @@ void loop() {
   delay(50);    //Added delay for good practice
 
 }//END LOOP
-
+//TODO
+  /* Clean up unnecessary delays
+   *  maintain and narrow down delays to a controllable structure
+   *  remove all time-based calls. Want everything handled by switches working first. Time calls for backup later
+   *  Go through commented out code and see what was going on there
+   */
 /*
  * sitUp()
  * Triggered by openRelay
