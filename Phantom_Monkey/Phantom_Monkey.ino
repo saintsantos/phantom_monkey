@@ -16,6 +16,7 @@
 #define ON LOW
 #define OFF HIGH
 
+
 //INPUT LIST
 int openRelay = 13;     //Relay (Button/DMX) to open prop
 int closeRelay = 2;     //Relay (Button/DMX) to close prop
@@ -25,33 +26,42 @@ int armsOpen = 6;       //Normally HIGH, goes LOW when arms are in safe close po
 int lidSwitch = 5;      //LOW when lid closed, HIGH when lid open
 //Input on A1 is RESET BUTTON
 
+
 //OUTPUT LIST
 int sitUpMotor = 7;     //Relay to DC motor, sits monkey up
 int layDownMotor = 8;   //Relay to DC motor, lays monkey down
+int clapMotor = 11;     //Relay to DC motor, runs arm clapping motion
+int led = 12;           //LED
+
+
+//Servos
 Servo lidServo;         //Servo, controls arms to open lid
 int lidServoPin = 9;    //output pin for lid servo
 Servo neckServo;        //Servo, controls head position
 int neckServoPin = 10;  //output pin for neck servo
-int clapMotor = 11;     //Relay to DC motor, runs arm clapping motion
-int led = 12;           //LED
 //Output on A0 is for SERVO POWER RELAY
 
-//PROGRAM VARIABLES
+
+//Servo Positions
 int lidServoOpen = 0;     //open position of lid servo
 int lidServoClose = 180;  //close position of lid servo
 int lidServoPos;          //current position of lid servo
-int lidTime = 8000;       //time to open lid in milliseconds
-
-int sitUpTime = 10000;        //LONGER THAN time to sit up in milliseconds (backup)
-int layDownTime = 10000;      //LONGER THAN time to lay down in milliseconds (backup)
-int timeCounter = 0;          //counter for time checks
 
 int neckServoUp = 180;    //up position of neck servo
 int neckServoDown = 0;   //down position of neck servo
 int neckServoPos;         //current position of lid servo
-int neckTime = 5000;      //time to lift head in milliseconds
 
+
+// Time variables (Deprecated)
+int neckTime = 5000;      //time to lift head in milliseconds
+int sitUpTime = 10000;        //LONGER THAN time to sit up in milliseconds (backup)
+int layDownTime = 10000;      //LONGER THAN time to lay down in milliseconds (backup)
+int lidTime = 8000;       //time to open lid in milliseconds
+
+int timeCounter = 0;          //counter for time checks
 int resetCounter = 0;
+
+
 
 //SETUP FUNCTION This code only runs once, upon startup
 void setup() { 
