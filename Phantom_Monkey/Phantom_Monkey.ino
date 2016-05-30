@@ -139,7 +139,7 @@ void sitUp() {
   digitalWrite(A0, ON);         //connects servo power
   for (lidServoPos = lidServoClose; lidServoPos > lidServoOpen; lidServoPos--){
     lidServo.write(lidServoPos);                 //open lid
-    delay(lidTime/abs(lidServoOpen-lidServoClose));               //wait for lid to open, divides time evenly across positional change
+    delay(lidTime/180);               //wait for lid to open, divides time evenly across positional change (Servo set to 180 difference)
   }
   delay(250);
   digitalWrite(sitUpMotor, ON);                //activate sitUpMotor
@@ -160,7 +160,7 @@ void sitUp() {
   digitalWrite(led, HIGH);              //turns on LED to proper voltage
   for (neckServoPos = neckServoDown; neckServoPos < neckServoUp; neckServoPos++){
     neckServo.write(neckServoPos);              //tilt head up
-    delay(neckTime/abs(neckServoUp-neckServoDown));            //wait for neck to complete
+    delay(neckTime/180);            //wait for neck to complete (Servo set to 180 difference)
   }
   delay(500);
   digitalWrite(clapMotor, ON);                //activate clapping motor
@@ -186,7 +186,7 @@ void layDown() {
       digitalWrite(clapMotor, OFF);                 //stop clapping
       for (neckServoPos = neckServoUp; neckServoPos > neckServoDown-1; neckServoPos--){
           neckServo.write(neckServoPos);              //lower head
-          delay(neckTime/abs(neckServoUp-neckServoDown));            //wait for neck to complete (value never changes, is 27.78ms every time)
+          delay(neckTime/180);            //wait for neck to complete (Servo set to 180 difference)
       }
       delay(250);
       analogWrite(led, LOW);                        //turn off LED
@@ -205,7 +205,7 @@ void layDown() {
      // timeCounter = 0;                              //reset timeCounter (deprecated)
       for (lidServoPos = lidServoOpen; lidServoPos < lidServoClose; lidServoPos++){
         lidServo.write(lidServoPos);                 //close lid
-        delay(lidTime/abs(lidServoOpen-lidServoClose));               //wait for lid to close, divides time evenly across positional change (Value never changes)
+        delay(lidTime/180);               //wait for lid to close, divides time evenly across positional change (Servo set to 180 difference)
       }
       //b = false;
       break;
