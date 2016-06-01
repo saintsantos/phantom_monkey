@@ -65,8 +65,8 @@ int resetCounter = 0;
 
 //SETUP FUNCTION This code only runs once, upon startup
 void setup() { 
-  pinMode(openRelay, INPUT_PULLUP);     //initiate openRelay as an input
-  pinMode(closeRelay, INPUT_PULLUP);    //initiate closeRelay as an input 
+  pinMode(openRelay, INPUT);            //initiate openRelay as an input
+  pinMode(closeRelay, INPUT);           //initiate closeRelay as an input 
   pinMode(sitUpSwitch, INPUT_PULLUP);   //initiate sitUpSwitch as an input
   pinMode(layDownSwitch, INPUT_PULLUP); //initiate layDownSwich as an input
   pinMode(armsOpen, INPUT_PULLUP);      //initiate armsOpen as an input
@@ -96,10 +96,10 @@ void loop() {
  // if (/*digitalRead(closeRelay)==HIGH && digitalRead(lidSwitch) == LOW && */ digitalRead(openRelay) == LOW) sitUp();
  // if (digitalRead(closeRelay)==LOW /* && digitalRead(lidSwitch) == HIGH && digitalRead(openRelay) == HIGH */) layDown();
 
-  if(digitalRead(openRelay) == LOW) {
+  if(digitalRead(openRelay) == HIGH) {
     sitUp();
   }
-  if(digitalRead(closeRelay) == HIGH) {
+  if(digitalRead(closeRelay) == LOW) {
     layDown();
   }
   
