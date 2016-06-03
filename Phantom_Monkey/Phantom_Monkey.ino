@@ -80,9 +80,9 @@ void setup() {
 //  pinMode(lidSwitch, INPUT_PULLUP);     //initiate lidSwitch as an input (remove)
  // pinMode(A1, INPUT_PULLUP);            //initiate A1 as input for RESET SWITCH (No reset)
   lidServo.write(0);                  //set to zero
-  lidServo.attach(lidServoPin);         //attach lidServo to lidServoPin0
+  //lidServo.attach(lidServoPin);         //attach lidServo to lidServoPin0
   neckServo.write(0);                 //set to zero
-  neckServo.attach(neckServoPin);       //attach neckServo to neckServoPin
+  //neckServo.attach(neckServoPin);       //attach neckServo to neckServoPin
   pinMode(sitUpMotor, OUTPUT);          //initiate sitUpMotor as an output
   pinMode(layDownMotor, OUTPUT);        //initiate layDownMotor as an output
   pinMode(led, OUTPUT);                 //initiate led as an output
@@ -134,12 +134,15 @@ void loop() {
  */
 void sitUp() {
   if (sittingUp == false) {
+    lidServo.attach(lidServoPin);
+    neckServo.attach(neckServoPin);
      digitalWrite(A0, ON);         //connects servo power
     for (lidServoPos = lidServoClose; lidServoPos > lidServoOpen; lidServoPos--){
       lidServo.write(lidServoPos);                 //open 
       Serial.println(lidServoPos);
       delay(lidTime/180);               //wait for lid to open, divides time evenly across positional change (Servo set to 180 difference)
     }
+    lidServo.detach(lidServoPin);
     delay(250);
     digitalWrite(sitUpMotor, ON);                //activate sitUpMotor
     while(digitalRead(sitUpSwitch) == HIGH /* && timeCounter < layDownTime */) {   //wait for sitUpSwitch (with timer backup)
@@ -156,6 +159,7 @@ void sitUp() {
       neckServo.write(neckServoPos);              //tilt head up
       delay(neckTime/180);            //wait for neck to complete (Servo set to 180 difference)
     }
+    neckServo.detach(neckServoPin);
     delay(500);
     digitalWrite(clapMotor, ON);                //activate clapping motor
     delay(500);
@@ -178,6 +182,8 @@ void sitUp() {
  */
 void layDown() {
   if (sittingUp == true) {
+    lidServo.attach(lidServoPin);
+    neckServo.attach(neckServoPin);
     bool b = true;
     digitalWrite(A0, ON);      //connects servo power
     while(b == true){
@@ -189,6 +195,7 @@ void layDown() {
             Serial.println(neckServoPos);
             delay(neckTime/180);            //wait for neck to complete (Servo set to 180 difference)
         }
+        neckServo.detach(neckServoPin);
         delay(250);
         analogWrite(led, LOW);                        //turn off LED
         Serial.println("Monkey lays down");
@@ -204,6 +211,7 @@ void layDown() {
           lidServo.write(lidServoPos);                 //close lid
           delay(lidTime/180);               //wait for lid to close, divides time evenly across positional change (Servo set to 180 difference)
         }
+        lidServo.detach(lidServoPin);
         sittingUp = false;
         b = false;
       }//END IF (armsOpen == LOW)
