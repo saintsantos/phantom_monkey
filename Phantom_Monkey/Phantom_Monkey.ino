@@ -5,6 +5,9 @@
  * Author: Chase D.H. Brooks
  * Date: 16 May 2016
  * 
+ * Modified: Edwin Santos
+ * Date: May 31, 2016
+ * 
  * The following code is not to be repurposed for other than its original intended use.
  * This code controls the monkey prop for the Networks national tour of Phantom of the Opera.
  * 
