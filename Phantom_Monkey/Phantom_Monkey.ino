@@ -61,6 +61,9 @@ int lidTime = 8000;       //time to open lid in milliseconds
 int timeCounter = 0;          //counter for time checks
 int resetCounter = 0;
 
+//Sitting boolean
+boolean sittingUp;
+
 
 
 //SETUP FUNCTION This code only runs once, upon startup
@@ -89,6 +92,7 @@ void setup() {
   digitalWrite(sitUpMotor, LOW);   //initialize sitUpMotor HIGH
   digitalWrite(layDownMotor, LOW); //initialize layDownMotor HIGH
   digitalWrite(clapMotor, LOW);  //initialize clapMotor HIGH
+  sittingUp = false;
 
 }//END SETUP
 
@@ -105,98 +109,64 @@ void loop() {
     Serial.println("Closed Pressed");
     layDown();
   }
-  if(digitalRead(sitUpSwitch) == LOW) {
-    Serial.println("sitUpSwitch Pressed");
-    //sitUp();
-  }
-  if(digitalRead(armsOpen) == LOW) {
-    Serial.println("armsOpen Pressed");
-    //layDown();
-  }
-  if(digitalRead(layDownSwitch) == LOW) {
-    Serial.println("layDownSwitch Pressed");
-    //sitUp();
-  }
   Serial.println("Waiting...");
   //sitUp();
   //layDown();
   
-/*Cutting Out Extras  
-  if (digitalRead(A1) == LOW) {
-    bool marker;
-    while(marker = resetPressed) {
-      delay(10);
-      resetCounter+=10;
-      if (resetCounter == 5000) {
-        marker = false;
-        resetLayDown();
-//        while (true) {
-//          digitalWrite(led, HIGH);
-//          delay(200);          
-//          digitalWrite(led, LOW);
-//          delay(200);
-//        }
-      }//ENF IF resetCounter == 5000
-    }//END WHILE resetPressed
-  }//END IF resetPressed
-*/
+
 
   delay(50);    //Added delay for good practice
 
 }//END LOOP
-//TODO
-  /* Clean up unnecessary delays
-   *  maintain and narrow down delays to a controllable structure
-   *  remove all time-based calls. Want everything handled by switches working first. Time calls for backup later
-   *  Go through commented out code and see what was going on there
-   */
+
 /*
  * sitUp()
  * Triggered by openRelay
+ * Will only trigger successfully when the sittingUp boolean is false (meaning the monkey is currently lying down)
+ * If monkey is sitting up and sittingUp boolean is triggered, sitUp() does nothing
  * Runs through cycle of opening lid, sitting monkey up, lifting head, LED on, clapping start
  * 
  * return void
  * return to loop() and shut down sitUpMotor if timer expires on sitting up motion
  */
 void sitUp() {
-  digitalWrite(A0, ON);         //connects servo power
-  for (lidServoPos = lidServoClose; lidServoPos > lidServoOpen; lidServoPos--){
-    lidServo.write(lidServoPos);                 //open 
-    Serial.println(lidServoPos);
-    delay(lidTime/180);               //wait for lid to open, divides time evenly across positional change (Servo set to 180 difference)
-  }
-  delay(250);
-  digitalWrite(sitUpMotor, ON);                //activate sitUpMotor
-  while(digitalRead(sitUpSwitch) == HIGH /* && timeCounter < layDownTime */) {   //wait for sitUpSwitch (with timer backup)
-    Serial.println(digitalRead(sitUpSwitch));
-    delay(10);         //checks sitUpSwitch every 10 milliseconds
-    //timeCounter+=10;     //increment timeCounter by 10 milliseconds //Time counter is not necessary here
-  }
+  if (sittingUp == false) {
+     digitalWrite(A0, ON);         //connects servo power
+    for (lidServoPos = lidServoClose; lidServoPos > lidServoOpen; lidServoPos--){
+      lidServo.write(lidServoPos);                 //open 
+      Serial.println(lidServoPos);
+      delay(lidTime/180);               //wait for lid to open, divides time evenly across positional change (Servo set to 180 difference)
+    }
+    delay(250);
+    digitalWrite(sitUpMotor, ON);                //activate sitUpMotor
+    while(digitalRead(sitUpSwitch) == HIGH /* && timeCounter < layDownTime */) {   //wait for sitUpSwitch (with timer backup)
+      Serial.println(digitalRead(sitUpSwitch));
+      delay(10);         //checks sitUpSwitch every 10 milliseconds
+      //timeCounter+=10;     //increment timeCounter by 10 milliseconds //Time counter is not necessary here
+    }
 
-/*
-  if (timeCounter == sitUpTime) {             //if sitUpSwitch didn't trigger, stop motor and exit layDown
-    digitalWrite(sitUpMotor, OFF);
-    return;                                     
+    Serial.println("sitUp Switch triggered");
+    digitalWrite(sitUpMotor, OFF);                //sitUpSwitch has gone low, break out of loop and turn off sitUpMotor
+    //timeCounter = 0;                              //reset timeCounter (deprecated)
+    digitalWrite(led, HIGH);              //turns on LED to proper voltage
+    for (neckServoPos = neckServoDown; neckServoPos < neckServoUp; neckServoPos++){
+      neckServo.write(neckServoPos);              //tilt head up
+      delay(neckTime/180);            //wait for neck to complete (Servo set to 180 difference)
+    }
+    delay(500);
+    digitalWrite(clapMotor, ON);                //activate clapping motor
+    delay(500);
+    digitalWrite(A0, OFF);        //cuts power to servos
+    delay(50);
+    sittingUp = true;
   }
-*/
-  Serial.println("sitUp Switch triggered");
-  digitalWrite(sitUpMotor, OFF);                //sitUpSwitch has gone low, break out of loop and turn off sitUpMotor
-  //timeCounter = 0;                              //reset timeCounter (deprecated)
-  digitalWrite(led, HIGH);              //turns on LED to proper voltage
-  for (neckServoPos = neckServoDown; neckServoPos < neckServoUp; neckServoPos++){
-    neckServo.write(neckServoPos);              //tilt head up
-    delay(neckTime/180);            //wait for neck to complete (Servo set to 180 difference)
-  }
-  delay(500);
-  digitalWrite(clapMotor, ON);                //activate clapping motor
-  delay(500);
-  digitalWrite(A0, OFF);        //cuts power to servos
-  delay(50);
 }
 
 /*
  * layDown()
  * Triggered by closeRelay
+ * Only runs when the sittingUp is true (monkey is currently in the sitting Position)
+ * If sittingUp boolean is false, layDown does nothing
  * Checks for proper arm position
  * Cycles through stopping claps, LED off, tilt head down, lay monkey down, close lid
  * 
@@ -204,99 +174,54 @@ void sitUp() {
  * return to loop() and shut down layDownMotor if timer expires on laying down motion
  */
 void layDown() {
-  bool b = true;
-  digitalWrite(A0, ON);      //connects servo power
-  while(b == true){
-    if (digitalRead(armsOpen) == LOW) {            //only runs when arms are ready to close
-      Serial.println("Arms Open Fully");
-      digitalWrite(clapMotor, OFF);                 //stop clapping
-      for (neckServoPos = neckServoUp; neckServoPos > neckServoDown-1; neckServoPos--){
-          neckServo.write(neckServoPos);              //lower head
-          Serial.println(neckServoPos);
-          delay(neckTime/180);            //wait for neck to complete (Servo set to 180 difference)
-      }
-      delay(250);
-      analogWrite(led, LOW);                        //turn off LED
-      Serial.println("Monkey lays down");
-      digitalWrite(layDownMotor, ON);             //activate layDownMotor
-      while(digitalRead(layDownSwitch) == HIGH /* && timeCounter < layDownTime*/) {   //wait for layDownSwitch (with timer backup)
-        delay(10);         //checks layDownSwitch every 10 milliseconds                   
-       // timeCounter+=10;    //increment timeCounter by 10 milliseconds (deprecated)
-      }
-      Serial.println("Monkey Laying Down");
-/*
-      if (timeCounter == layDownTime) {             //if layDownSwitch didn't trigger, stop motor and exit layDown
-        digitalWrite(layDownMotor, OFF);
-        return;                                     
-      }
-*/
+  if (sittingUp == true) {
+    bool b = true;
+    digitalWrite(A0, ON);      //connects servo power
+    while(b == true){
+      if (digitalRead(armsOpen) == LOW) {            //only runs when arms are ready to close
+        Serial.println("Arms Open Fully");
+        digitalWrite(clapMotor, OFF);                 //stop clapping
+        for (neckServoPos = neckServoUp; neckServoPos > neckServoDown-1; neckServoPos--){
+            neckServo.write(neckServoPos);              //lower head
+            Serial.println(neckServoPos);
+            delay(neckTime/180);            //wait for neck to complete (Servo set to 180 difference)
+        }
+        delay(250);
+        analogWrite(led, LOW);                        //turn off LED
+        Serial.println("Monkey lays down");
+        digitalWrite(layDownMotor, ON);             //activate layDownMotor
+        while(digitalRead(layDownSwitch) == HIGH) {   //wait for layDownSwitch (with timer backup)
+          delay(10);         //checks layDownSwitch every 10 milliseconds                   
+          
+        }
+        Serial.println("Monkey Laying Down");
   
-      digitalWrite(layDownMotor, OFF);              //stop layDownMotor
-     // timeCounter = 0;                              //reset timeCounter (deprecated)
-      for (lidServoPos = lidServoOpen; lidServoPos < lidServoClose; lidServoPos++){
-        lidServo.write(lidServoPos);                 //close lid
-        delay(lidTime/180);               //wait for lid to close, divides time evenly across positional change (Servo set to 180 difference)
-      }
-      b = false;
-      //break;
-    }//END IF (armsOpen == LOW)
-    Serial.println(b);
-    Serial.println("Switch not triggered");
-  }//END WHILE (b)
-  delay(100);
-  digitalWrite(A0, OFF);     //cuts power to servos
-  delay(50);
+        digitalWrite(layDownMotor, OFF);              //stop layDownMotor
+        for (lidServoPos = lidServoOpen; lidServoPos < lidServoClose; lidServoPos++){
+          lidServo.write(lidServoPos);                 //close lid
+          delay(lidTime/180);               //wait for lid to close, divides time evenly across positional change (Servo set to 180 difference)
+        }
+        sittingUp = false;
+        b = false;
+      }//END IF (armsOpen == LOW)
+      Serial.println(b);
+      Serial.println("Switch not triggered");
+    }//END WHILE (b)
+    delay(100);
+    digitalWrite(A0, OFF);     //cuts power to servos
+    delay(50);
+  }//END if sittingUp
 }//END layDown()
+
+
 /*TODO
- * Prevent re-enable of situp function once completed
+ * Prevent re-enable of situp function once completed (Completed)
  * Set inputs properly for relay
- * remove resetLayDown()
- * 
+ * remove resetLayDown() (Completed)
+ * final testing
  */
 
 
-/*
-
-bool resetPressed() {
-  if (digitalRead(closeRelay)==LOW && digitalRead(lidSwitch)== HIGH && digitalRead(openRelay) == LOW)  {
-    return true;
-  }
-  return false;
-}
-
-void resetLayDown() {
-  analogWrite(led, LOW);
-  if (digitalRead(armsOpen) == HIGH){
-    while(digitalRead(armsOpen) == HIGH) {
-      digitalWrite(clapMotor, ON);
-    }
-    digitalWrite(clapMotor, OFF);
-    for (neckServoPos = neckServoUp; neckServoPos > neckServoDown-1; neckServoPos--){
-        neckServo.write(neckServoPos);              //lower head
-        delay(neckTime/abs(neckServoUp-neckServoDown));            //wait for neck to complete
-    }
-  }
-  if(digitalRead(layDownSwitch) == HIGH) {
-      digitalWrite(layDownMotor, ON);             //activate layDownMotor
-      while(digitalRead(layDownSwitch) == HIGH && timeCounter < layDownTime) {   //wait for layDownSwitch (with timer backup)
-        delay(10);         //checks layDownSwitch every 10 milliseconds                   
-        timeCounter+=10;    //increment timeCounter by 10 milliseconds
-      }
-      if (timeCounter == layDownTime) {             //if layDownSwitch didn't trigger, stop motor and exit layDown
-        digitalWrite(layDownMotor, OFF);
-        return;                                     
-      }
-      digitalWrite(layDownMotor, OFF);              //stop layDownMotor
-      timeCounter = 0;                              //reset timeCounter  
-  }
-  if(digitalRead(lidSwitch) == HIGH) {
-    for (lidServoPos = lidServoOpen; lidServoPos < lidServoClose; lidServoPos++){
-      lidServo.write(lidServoPos);                 //close lid
-      delay(lidTime/abs(lidServoOpen-lidServoClose));               //wait for lid to close, divides time evenly across positional change
-    }
-  }
-}
-*/
 /*
  * Changes from v4.0:
  *    Open and Close limits for lid servo
